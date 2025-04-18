@@ -73,18 +73,13 @@ function createWindow(): void {
 		},
 	})
 
-	if (process.platform !== 'darwin') {
-		//@ts-expect-error ok for this
-		mainWindow.on('minimize', (event) => {
-			event.preventDefault()
-			mainWindow?.hide()
-		})
-
-		mainWindow.on('close', (event) => {
-			event.preventDefault()
-			mainWindow?.hide()
-		})
-	}
+	mainWindow.on('close', (event) => {
+		event.preventDefault()
+		if (process.platform === 'darwin') {
+			app?.dock?.hide()
+		}
+		mainWindow?.hide()
+	})
 
 	mainWindow.on('ready-to-show', () => {
 		mainWindow.show()
