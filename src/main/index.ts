@@ -1,12 +1,21 @@
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { BrowserWindow, Menu, Notification, Tray, app, ipcMain, nativeImage, shell } from 'electron'
 import icon from '../../resources/icon.png?asset'
+import icon64 from '../../resources/icon32Template.png?asset'
+
+import { fileURLToPath } from 'node:url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 let tray: Tray
 
 function createTray(mainWindow: BrowserWindow) {
-	tray = new Tray(icon)
+	const trayIcon = nativeImage.createFromPath(process.platform === 'darwin' ? icon64 : icon)
+	trayIcon.setTemplateImage(true) // importante para o modo escuro no macOS
+
+	tray = new Tray(trayIcon)
 
 	updateTrayMenu(mainWindow, tray)
 
@@ -54,7 +63,7 @@ function createWindow(): void {
 		resizable: false,
 		roundedCorners: true,
 		show: false,
-		autoHideMenuBar: false,
+		autoHideMenuBar: true,
 		icon: nativeImage.createFromPath(icon),
 		webPreferences: {
 			preload: join(__dirname, '../preload/index.js'),
@@ -64,16 +73,18 @@ function createWindow(): void {
 		},
 	})
 
-	//@ts-expect-error ok for this
-	mainWindow.on('minimize', (event) => {
-		event.preventDefault()
-		mainWindow?.hide()
-	})
+	if (process.platform !== 'darwin') {
+		//@ts-expect-error ok for this
+		mainWindow.on('minimize', (event) => {
+			event.preventDefault()
+			mainWindow?.hide()
+		})
 
-	mainWindow.on('close', (event) => {
-		//event.preventDefault()
-		mainWindow?.hide()
-	})
+		mainWindow.on('close', (event) => {
+			event.preventDefault()
+			mainWindow?.hide()
+		})
+	}
 
 	mainWindow.on('ready-to-show', () => {
 		mainWindow.show()
@@ -101,7 +112,6 @@ function createWindow(): void {
 app.whenReady().then(() => {
 	// Set app user model id for windows
 	electronApp.setAppUserModelId('Stealth')
-
 	// Default open or close DevTools by F12 in development
 	// and ignore CommandOrControl + R in production.
 	// see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils

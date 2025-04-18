@@ -5,7 +5,6 @@ import * as windows from './windows-proxy'
 
 export const proxy = {
 	checkManualProxyStatus: async (): Promise<boolean> => {
-		console.log('esta aqui')
 		if (isMac) {
 			return await macos.isProxyEnabled()
 		}

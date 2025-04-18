@@ -69,7 +69,6 @@ export const useProxyState = () => {
 		const settings = loadSettings()
 		const proxyEnabled = await checkManualProxyStatus()
 
-		console.log('is os', proxyEnabled)
 		const portAndIp = await getPortAndIp()
 
 		const ip = portAndIp?.port ?? settings?.port

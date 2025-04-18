@@ -1,6 +1,9 @@
 import { EventEmitter } from 'node:events'
 import * as fs from 'node:fs'
+import * as os from 'node:os'
 import * as path from 'node:path'
+
+const macUserDataPath = `/Users/${os.userInfo().username}/Library/Application Support`
 
 export class Store extends EventEmitter {
 	private readonly filePath: string
@@ -9,7 +12,7 @@ export class Store extends EventEmitter {
 	constructor({ fileName = 'store.json', defaults = {} }: { defaults?: any; fileName?: string }) {
 		super()
 		this.events = new EventTarget()
-		const userDataPath = path.resolve('.') // ou app.getPath('userData') no Electron
+		const userDataPath = process.platform === 'darwin' ? macUserDataPath : path.resolve('.') // ou app.getPath('userData') no Electron
 		this.filePath = path.join(userDataPath, fileName)
 
 		if (!fs.existsSync(this.filePath)) {
